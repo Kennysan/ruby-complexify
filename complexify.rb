@@ -189,15 +189,15 @@ class Complexify
     end
 
     def additionalComplexityForCharset(str, charset)
-      len = str.length.mb_chars.length
-      str.each_char.mb_chars.each_char { |c|
+      len = str.length
+      str.each_char { |c|
         char = c.clone
         char = char.encode('UCS-4BE', @encoding).unpack('N')
         if charset[0] <= char[0] && char[0] <= charset[1]
           return charset[1] - charset[0] +1
         end
       }
-      puts 0
+      return 0
     end
 
     def inBanlist(str)
@@ -219,7 +219,7 @@ class Complexify
     def evaluateSecurity(password)
       complexity = 0
       error = Array[]
-      if inBanlist(password)
+      unless inBanlist(password)
         CHARSETS.each { |charset|
           complexity += additionalComplexityForCharset(password, charset)
         }
@@ -227,11 +227,11 @@ class Complexify
         error.push('banned')
         complexity = 1
       end
-      complexity = Math.log(complexity**password.mb_chars.length) * (1/@strengthScaleFactor)
+      complexity = Math.log(complexity**password.length) * (1/@strengthScaleFactor)
       if complexity <= MIN_COMPLEXITY
         error.push('toosimple')
       end
-      if password.mb_chars.length < @minimumChars
+      if password.length < @minimumChars
         error.push('tooshort')
       end
 
